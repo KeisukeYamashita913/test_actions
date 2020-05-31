@@ -1,32 +1,29 @@
-TARGET = createROOTfile
- 
-DEP = $(TARGET).d
-SRCS = $(TARGET).cc
-OBJS = $(addsuffix .o, $(basename $(SRCS)))
- 
-ROOTCFLAGS = $(shell root-config --cflags)
-ROOTLIBS = $(shell root-config --libs)
-CXXFLAGS = $(ROOTCFLAGS) -Wall
-CXXLIBS = $(ROOTLIBS)
-CC = g++
- 
-all: dep $(TARGET)
- 
-$(TARGET):$(OBJS)
-    $(CC) $(CXXLIBS) $(OBJS) -o $@
- 
-anaCalib:anaCalib.o
-    $(CC) $(CXXLIBS) anaCalib.o -o $@
- 
-checkHist:checkHist.o
-    $(CC) $(CXXLIBS) checkHist.o -o $@
- 
-.cc.o:
-    $(CC) $(CXXFLAGS) -c $<
- 
-dep:
-    $(CC) -MM $(CXXFLAGS) $(SRCS) > $(DEP) -include $(DEP)
- 
+TARGET = app
+
+SRCS = $(shell find  ./src     -type f -name *.cpp)
+HEADS = $(shell find ./include -type f -name *.h)
+OBJS = $(SRCS:.cpp=.o)
+DEPS = Makefile.depend
+
+INCLUDES = -I./include
+CXXFLAGS = -02 -Wall $(INCLUDES)
+LDFLAGS = -lm
+
+
+all: $(TARGET)
+
+$(TARGET): $(OBJS) $(HEADS)
+  $(CXX) $(LDFLAGS) -o $@ $(OBJS)
+  
+run: all
+  @./$(TARGET)
+  
+.PHONY: depend clean
+depend:
+  $(CXX) $(INCLUDES) -MM $(SRCS) > $(DEPS)
+  @sed -i -E "s/^(.+?).o: ([^ ]+?)\1/\2\1.o: \2\1/g" $(DEPS)
+  
 clean:
-    rm -f $(TARGET) $(OBJS) $(DEP)
- -include $(DEPS)
+  $(RM) $(OBJS) $(TARGET)
+  
+-include $(DEPS)
