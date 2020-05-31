@@ -16,7 +16,7 @@ $(TARGET): $(OBJS) $(HEADS)
 	$(CXX) $(LDFLAGS) -o $@ $(OBJS)
   
 run: all
-  @./$(TARGET)
+	@./$(TARGET)
   
 .PHONY: depend clean
 depend:
